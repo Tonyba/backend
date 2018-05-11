@@ -1,157 +1,131 @@
 const router = require('express').Router();
+const Hospital = require('../models/hospital');
 const User = require('../models/user');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const SEED = require('../auth/config');
 const mdAuth = require('../middleware/auth');
-
 
 router.get('/', (req, res) => {
 
     let from = req.query.from || 0;
     from = Number(from);
 
-    User.find({}, 'name email img role')
+    Hospital.find({})
         .skip(from)
         .limit(5)
-        .exec((err, users) => {
-
+        .populate('user', 'name email')
+        .exec((err, hospitals) => {
             if (err) {
                 return res.status(500).json({
                     ok: false,
-                    message: 'error downloading users',
+                    message: 'error getting hospitals',
                     errors: err
                 });
             }
 
-            User.count({}, (err, counter) => {
+            Hospital.count({}, (err, counter) => {
                 res.status(200).json({
                     ok: true,
-                    users,
+                    hospitals,
                     total: counter
                 });
             });
-
-
-
         });
-
 });
 
-router.post('/', (req, res) => {
+router.post('/', mdAuth.verifyToken, (req, res) => {
 
     const body = req.body;
 
-    const user = new User({
+    const hospital = new Hospital({
         name: body.name,
-        email: body.email,
-        password: bcrypt.hashSync(body.password, 10),
-        img: body.img,
-        role: body.role
-
+        user: req.user._id
     });
 
-    user.save((err, newUser) => {
+    hospital.save((err, newHospital) => {
         if (err) {
-            return res.status(400).json({
+            return res.status(500).json({
                 ok: false,
-                message: 'error saving user',
+                messsage: 'error posting hospital',
                 errors: err
             });
         }
 
         res.status(201).json({
             ok: true,
-            message: 'user saved in DB',
-            User: newUser
+            message: 'succes on posting new Hospital',
+            hospital: newHospital
         });
-
     });
+
 });
 
-
 router.put('/:id', mdAuth.verifyToken, (req, res) => {
-
     const id = req.params.id;
     const body = req.body;
 
-    User.findById(id, (err, user) => {
-
+    Hospital.findById(id, (err, hospital) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
-                message: 'error finding user',
+                message: 'error updating hospital in db',
                 errors: err
             });
         }
 
-        if (!user) {
+        if (!hospital) {
             return res.status(404).json({
                 ok: false,
-                message: 'no user found',
-                errors: err
-
+                message: 'no hospital found'
             });
         }
 
-        user.name = body.name;
-        user.email = body.email;
-        user.role = body.role;
+        hospital.name = body.name;
+        hospital.user = req.user._id;
 
-        user.save((err, updatedUser) => {
+        hospital.save((err, updatedHospital) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
-                    message: 'error updating users',
+                    message: 'error updating hospital',
                     errors: err
                 });
             }
 
-            updatedUser.password = 'no good luck, dude :(';
-
             res.status(200).json({
                 ok: true,
-                message: 'user updated in DB',
-                User: updatedUser,
-                userToken: req.user
+                message: 'hospital updated',
+                hospital: updatedHospital
             });
-
-        })
-
-
+        });
 
     });
-
-
 
 });
 
 
 router.delete('/:id', mdAuth.verifyToken, (req, res) => {
-
     const id = req.params.id;
 
-    User.findByIdAndRemove(id, (err, deletedUser) => {
+    Hospital.findByIdAndRemove(id, (err, deletedHospital) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
-                message: 'error deleting user',
+                message: 'error deleting hospital',
                 errors: err
             });
         }
 
-        if (!deletedUser) {
+        if (!deletedHospital) {
             return res.status(404).json({
                 ok: false,
-                message: 'error finding user',
-            })
+                message: 'no hospital found'
+            });
         }
 
         res.status(200).json({
             ok: true,
-            message: 'user deleted',
-            deletedUser
-        })
+            message: 'success on deleting hospital',
+            deletedHospital
+        });
 
     });
 
