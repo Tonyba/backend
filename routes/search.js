@@ -43,7 +43,7 @@ router.get('/hospitals/:search', (req, res) => {
     const regex = new RegExp(search, 'i');
 
     searchHospitals(search, regex).then(hospitals => {
-        res.send(200).json({
+        res.status(200).json({
             ok: true,
             hospitals
         });
@@ -54,8 +54,8 @@ router.get('/users/:search', (req, res) => {
     const search = req.params.search;
     const regex = new RegExp(search, 'i');
 
-    searchHospitals(search, regex).then(users => {
-        res.send(200).json({
+    searchUsers(search, regex).then(users => {
+        res.status(200).json({
             ok: true,
             users
         });

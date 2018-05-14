@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
     let from = req.query.from || 0;
     from = Number(from);
 
-    User.find({}, 'name email img role')
+    User.find({}, 'name email img role google')
         .skip(from)
         .limit(5)
         .exec((err, users) => {
