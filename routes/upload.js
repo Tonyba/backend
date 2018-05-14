@@ -29,10 +29,12 @@ router.put('/:type/:id', (req, res) => {
         });
     }
 
+    // fileName
     const file = req.files.img;
     const name = file.name.split('.');
     const ext = name[name.length - 1];
 
+    // valid extentions
     const validExt = ['png', 'jpg', 'gif', 'jpeg'];
 
     if (validExt.indexOf(ext) < 0) {
@@ -68,6 +70,13 @@ function uploadByType(type, id, fileName, res) {
 
         User.findById(id, (err, user) => {
 
+            if (!user) {
+                return res(404).json({
+                    ok: false,
+                    message: 'the user does not exist'
+                });
+            }
+
             if (err) throw err;
 
             const oldPath = './uploads/users/' + user.img;
@@ -78,11 +87,11 @@ function uploadByType(type, id, fileName, res) {
 
             user.img = fileName;
 
-            user.save((err, updatedImage) => {
+            user.save((err, user) => {
                 return res.status(200).json({
                     ok: true,
                     message: 'user image updated',
-                    updatedImage
+                    user
                 });
             });
 
@@ -92,6 +101,13 @@ function uploadByType(type, id, fileName, res) {
 
     if (type === 'medics') {
         Medic.findById(id, (err, medic) => {
+
+            if (!medic) {
+                return res(404).json({
+                    ok: false,
+                    message: 'the medic does not exist'
+                });
+            }
 
             if (err) throw err;
 
@@ -103,11 +119,11 @@ function uploadByType(type, id, fileName, res) {
 
             medic.img = fileName;
 
-            medic.save((err, updatedImage) => {
+            medic.save((err, medic) => {
                 return res.status(200).json({
                     ok: true,
                     message: 'medic image updated',
-                    updatedImage
+                    medic
                 });
             });
 
@@ -116,6 +132,13 @@ function uploadByType(type, id, fileName, res) {
 
     if (type === 'hospitals') {
         Hospital.findById(id, (err, hospital) => {
+
+            if (!hospital) {
+                return res(404).json({
+                    ok: false,
+                    message: 'the hospital does not exist'
+                });
+            }
 
             if (err) throw err;
 
@@ -127,11 +150,11 @@ function uploadByType(type, id, fileName, res) {
 
             hospital.img = fileName;
 
-            hospital.save((err, updatedImage) => {
+            hospital.save((err, hospital) => {
                 return res.status(200).json({
                     ok: true,
                     message: 'hospital image updated',
-                    updatedImage
+                    hospital
                 });
             });
 

@@ -7,7 +7,7 @@ router.get('/:type/:img', (req, res) => {
     const type = req.params.type;
     const img = req.params.img;
 
-    const pathImage = path.resolve(__dirname, ` ../uploads/${type}/${img} `);
+    const pathImage = path.resolve(__dirname, `../uploads/${type}/${img}`);
 
     if (fs.existsSync(pathImage)) {
         res.sendFile(pathImage);
