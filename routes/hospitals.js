@@ -31,6 +31,35 @@ router.get('/', (req, res) => {
         });
 });
 
+router.get('/:id', (req, res) => {
+    const id = req.params.id;
+
+    Hospital.findById(id)
+        .populate('user', 'name img email')
+        .exec((err, hospital) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    message: 'error on DB'
+                });
+            }
+
+            if (!hospital) {
+                return res.status(404).json({
+                    ok: false,
+                    message: 'the hospital does not exist'
+                })
+            }
+
+            res.status(200).json({
+                ok: true,
+                message: 'success on getting hospital',
+                hospital
+            })
+
+        });
+});
+
 router.post('/', mdAuth.verifyToken, (req, res) => {
 
     const body = req.body;

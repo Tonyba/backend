@@ -10,8 +10,6 @@ router.get('/', (req, res) => {
     from = Number(from);
 
     Medic.find({})
-        .skip(from)
-        .limit(5)
         .populate('user', 'name email')
         .populate('hospital')
         .exec((err, medics) => {
@@ -36,6 +34,36 @@ router.get('/', (req, res) => {
 
         });
 
+});
+
+router.get('/:id', (req, res) => {
+    const id = req.params.id;
+
+    Medic.findById(id)
+        .populate('user', 'name img email')
+        .populate('hospital')
+        .exec((err, medic) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    message: 'error on DB'
+                });
+            }
+
+            if (!medic) {
+                return res.status(404).json({
+                    ok: false,
+                    message: 'the medic does not exist'
+                })
+            }
+
+            res.status(200).json({
+                ok: true,
+                message: 'success on getting medic',
+                medic
+            })
+
+        });
 });
 
 router.post('/', mdAuth.verifyToken, (req, res) => {
